@@ -15,9 +15,21 @@
 import streamlit as st
 from streamlit.logger import get_logger
 import pandas as pd
+import numpy as np
+import altair as alt
+import plotly.express as px
 
 
 LOGGER = get_logger(__name__)
+
+# pre-formatting data
+week1data = pd.read_csv("week1picks.csv")
+
+# from prompt: turn first row of pandas dataframe into headers
+# also drop a few unnecessary cols
+# week1data.columns = week1data.iloc[0]
+# week1data = week1data.drop(0)
+# week1data = week1data.drop(['Timestamp', 'Best Bet', ''], axis=1)
 
 
 def run():
@@ -28,11 +40,52 @@ def run():
 
     st.write(":balloon: # Welcome to Streamlit! 👋 This is Brian's first streamlit deployment")
 
-    st.write("Here's our first attempt at using data to create a table:")
-    st.write(pd.DataFrame({
-        'first column': [1, 2, 3, 4],
-        'second column': [10, 20, 30, 40]
-    }))
+    st.markdown("## Week 1 Picks")
+
+    week1data = pd.read_csv("week1picks.csv")
+    week1data = week1data.drop(['Old Record', 'Record', 'Old BB Rec', 'Best Bet Record'], axis=1)
+    week1data
+
+    st.markdown("## Week 1 \#data")
+
+    game1df = week1data['Browns vs. Texans (+2.5)'].value_counts().astype(int).to_frame()
+
+    st.markdown("Plotly chart")
+
+    st.write(game1df)
+
+    # game1df = pd.Series(week1data['Browns vs. Texans (+2.5)'].value_counts())
+    # st.write(game1df)
+
+    # chart_data = pd.DataFrame(np.random.randn(20, 3), columns=["a", "b", "c"])
+
+    test_data = pd.DataFrame({"pick": ['Browns -2.5', 'Texans +2.5'],
+                          "counts": [36, 14]})
+    
+    st.bar_chart(test_data, x='counts', y='pick')
+
+    base = (
+      alt.Chart(test_data)
+      .mark_bar()
+      .encode( # x="counts", y="pick")
+      x=alt.X('counts', axis=alt.Axis(title=None)),
+      y=alt.Y('pick', axis=alt.Axis(title=None)),
+    )               )
+
+#     c = base.mark_bar() # + base.mark_text(align='left', dx=2)
+    # st.write(type(base.mark_bar()))
+    st.altair_chart(base) #, use_container_width=True)
+
+    left_column, right_column = st.columns(2)
+    # You can use a column just like st.sidebar:
+    left_column.button('Press me!')
+
+    # Or even better, call Streamlit functions inside a "with" block:
+    with right_column:
+        chosen = st.radio(
+            'Sorting hat',
+            ("Gryffindor", "Ravenclaw", "Hufflepuff", "Slytherin"))
+        st.write(f"You are in {chosen} house!")
 
     st.sidebar.success("Select a demo above.")
 
