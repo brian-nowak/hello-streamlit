@@ -18,6 +18,8 @@ import pandas as pd
 import numpy as np
 import altair as alt
 import plotly.express as px
+import plotly.graph_objects as go
+
 
 
 LOGGER = get_logger(__name__)
@@ -49,8 +51,15 @@ def run():
     st.markdown("## Week 1 \#data")
 
     game1df = week1data['Browns vs. Texans (+2.5)'].value_counts().astype(int).to_frame()
+    test_data = pd.DataFrame({"Game 1": ['Browns -2.5', 'Texans +2.5'],
+                          "counts": [36, 14]})
 
     st.markdown("Plotly chart")
+
+    fig = px.bar(test_data, x='Game 1', y='counts', text_auto=True)
+    fig = fig.update_yaxes(visible=False)
+    
+    st.plotly_chart(fig)
 
     st.write(game1df)
 
@@ -59,9 +68,7 @@ def run():
 
     # chart_data = pd.DataFrame(np.random.randn(20, 3), columns=["a", "b", "c"])
 
-    test_data = pd.DataFrame({"pick": ['Browns -2.5', 'Texans +2.5'],
-                          "counts": [36, 14]})
-    
+
     st.bar_chart(test_data, x='counts', y='pick')
 
     base = (
