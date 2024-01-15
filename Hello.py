@@ -53,20 +53,56 @@ def run():
     game1df = week1data['Browns vs. Texans (+2.5)'].value_counts().astype(int).to_frame()
     test_data = pd.DataFrame({"Game 1": ['Browns -2.5', 'Texans +2.5'],
                           "counts": [36, 14]})
+    
+    left_column, right_column = st.columns(2)
 
-    st.markdown("Plotly chart")
+    # game1series = week1data['Browns vs. Texans (+2.5)'].value_counts()
+    construct_df = pd.DataFrame({"Game 1": ['Browns -2.5', 'Texans +2.5'], 
+                                    "counts": week1data['Browns vs. Texans (+2.5)'].value_counts()})
 
-    fig = px.bar(test_data, x='Game 1', y='counts', text_auto=True)
-    fig = fig.update_yaxes(visible=False)
-    fig.update_layout(
+    construct_df2 = pd.DataFrame({"Game 2": ['Chiefs -4.5', 'Dolphins +4.5'], 
+                                    "counts": week1data['Dolphins vs. Chiefs (-4.5)'].value_counts()})
+        #construct_df = construct_df.style.hide_index()
+    
+    # Game 1
+    fig1 = px.bar(construct_df, x='Game 1', y='counts', text_auto=True)
+    fig1 = fig1.update_yaxes(visible=False)
+    fig1.update_layout(
     font=dict(
         size=18,  # Set the font size here
         # color="RebeccaPurple"
     ))
-    
-    st.plotly_chart(fig)
 
+    # Game 1
+    fig2 = px.bar(construct_df2, x='Game 2', y='counts', text_auto=True)
+    fig2 = fig2.update_yaxes(visible=False)
+    fig2.update_layout(
+    font=dict(
+        size=18,  # Set the font size here
+        # color="RebeccaPurple"
+    ))
+
+    with left_column:
+        st.dataframe(construct_df, hide_index=True)
+        st.plotly_chart(fig1)
+    with right_column:
+        st.dataframe(construct_df2, hide_index=True)
+        st.plotly_chart(fig2)
+
+
+    st.markdown("Plotly chart")
+    
+    
+
+    
+
+    st.write("Printing game1df")
+    # st.write(type(game1df))
     st.write(game1df)
+
+    st.write("Printing test_data")
+    # st.write(type(test_data))
+    st.write(test_data)
 
     # game1df = pd.Series(week1data['Browns vs. Texans (+2.5)'].value_counts())
     # st.write(game1df)
@@ -88,36 +124,37 @@ def run():
     # st.write(type(base.mark_bar()))
     st.altair_chart(base) #, use_container_width=True)
 
-    left_column, right_column = st.columns(2)
+    # left_column, right_column = st.columns(2)
     # You can use a column just like st.sidebar:
-    left_column.button('Press me!')
 
-    # Or even better, call Streamlit functions inside a "with" block:
-    with right_column:
-        chosen = st.radio(
-            'Sorting hat',
-            ("Gryffindor", "Ravenclaw", "Hufflepuff", "Slytherin"))
-        st.write(f"You are in {chosen} house!")
+    # left_column.button('Press me!')
 
-    st.sidebar.success("Select a demo above.")
+    # # Or even better, call Streamlit functions inside a "with" block:
+    # with right_column:
+    #     chosen = st.radio(
+    #         'Sorting hat',
+    #         ("Gryffindor", "Ravenclaw", "Hufflepuff", "Slytherin"))
+    #     st.write(f"You are in {chosen} house!")
 
-    st.markdown(
-        """
-        Streamlit is an open-source app framework built specifically for
-        Machine Learning and Data Science projects.
-        **👈 Select a demo from the sidebar** to see some examples
-        of what Streamlit can do!
-        ### Want to learn more?
-        - Check out [streamlit.io](https://streamlit.io)
-        - Jump into our [documentation](https://docs.streamlit.io)
-        - Ask a question in our [community
-          forums](https://discuss.streamlit.io)
-        ### See more complex demos
-        - Use a neural net to [analyze the Udacity Self-driving Car Image
-          Dataset](https://github.com/streamlit/demo-self-driving)
-        - Explore a [New York City rideshare dataset](https://github.com/streamlit/demo-uber-nyc-pickups)
-    """
-    )
+    # st.sidebar.success("Select a demo above.")
+
+    # st.markdown(
+    #     """
+    #     Streamlit is an open-source app framework built specifically for
+    #     Machine Learning and Data Science projects.
+    #     **👈 Select a demo from the sidebar** to see some examples
+    #     of what Streamlit can do!
+    #     ### Want to learn more?
+    #     - Check out [streamlit.io](https://streamlit.io)
+    #     - Jump into our [documentation](https://docs.streamlit.io)
+    #     - Ask a question in our [community
+    #       forums](https://discuss.streamlit.io)
+    #     ### See more complex demos
+    #     - Use a neural net to [analyze the Udacity Self-driving Car Image
+    #       Dataset](https://github.com/streamlit/demo-self-driving)
+    #     - Explore a [New York City rideshare dataset](https://github.com/streamlit/demo-uber-nyc-pickups)
+    # """
+    # )
 
 
 if __name__ == "__main__":
