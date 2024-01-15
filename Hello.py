@@ -14,6 +14,8 @@
 
 import streamlit as st
 from streamlit.logger import get_logger
+import pandas as pd
+
 
 LOGGER = get_logger(__name__)
 
@@ -24,7 +26,13 @@ def run():
         page_icon="👋",
     )
 
-    st.write("# Welcome to Streamlit! 👋")
+    st.write(":balloon: # Welcome to Streamlit! 👋 This is Brian's first streamlit deployment")
+
+    st.write("Here's our first attempt at using data to create a table:")
+    st.write(pd.DataFrame({
+        'first column': [1, 2, 3, 4],
+        'second column': [10, 20, 30, 40]
+    }))
 
     st.sidebar.success("Select a demo above.")
 
