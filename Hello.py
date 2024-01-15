@@ -58,6 +58,11 @@ def run():
 
     fig = px.bar(test_data, x='Game 1', y='counts', text_auto=True)
     fig = fig.update_yaxes(visible=False)
+    fig.update_layout(
+    font=dict(
+        size=18,  # Set the font size here
+        # color="RebeccaPurple"
+    ))
     
     st.plotly_chart(fig)
 
@@ -69,15 +74,15 @@ def run():
     # chart_data = pd.DataFrame(np.random.randn(20, 3), columns=["a", "b", "c"])
 
 
-    st.bar_chart(test_data, x='counts', y='pick')
+    # st.bar_chart(test_data, x='counts', y='pick')
 
     base = (
       alt.Chart(test_data)
       .mark_bar()
       .encode( # x="counts", y="pick")
       x=alt.X('counts', axis=alt.Axis(title=None)),
-      y=alt.Y('pick', axis=alt.Axis(title=None)),
-    )               )
+      y=alt.Y('Game 1', axis=alt.Axis(title=None)),
+    ))
 
 #     c = base.mark_bar() # + base.mark_text(align='left', dx=2)
     # st.write(type(base.mark_bar()))
