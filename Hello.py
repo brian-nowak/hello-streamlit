@@ -33,6 +33,81 @@ week1data = pd.read_csv("week1picks.csv")
 # week1data = week1data.drop(0)
 # week1data = week1data.drop(['Timestamp', 'Best Bet', ''], axis=1)
 
+# week1data = pd.read_csv("week1picks.csv")
+week1data = week1data.drop(['Old Record', 'Record', 'Old BB Rec', 'Best Bet Record'], axis=1)
+
+# get counts for picks for each game
+game_list = week1data.columns.values.tolist()
+game_list = game_list[1:7]
+
+# construct a df of picks for each game
+game1df = pd.DataFrame({"Game 1": ['Browns -2.5', 'Texans +2.5'], 
+                                    "counts": week1data["Browns vs. Texans (+2.5)"].value_counts()})
+game2df = pd.DataFrame({"Game 2": ['Chiefs -4.5', 'Dolphins +4.5'], 
+                                    "counts": week1data["Dolphins vs. Chiefs (-4.5)"].value_counts()})
+game3df = pd.DataFrame({"Game 3": ['Cowboys -7.5', 'Packers +7.5'], 
+                                    "counts": week1data["Packers vs. Cowboys (-7.5)"].value_counts()})
+game4df = pd.DataFrame({"Game 4": ['Lions -3', 'Rams +3'], 
+                                    "counts": week1data["Rams vs. Lions (-3)"].value_counts()})
+game5df = pd.DataFrame({"Game 5": ['Steelers +10', 'Bills -10'], 
+                                    "counts": week1data["Steelers vs. Bills (-10)"].value_counts()})
+game6df = pd.DataFrame({"Game 6": ['Eagles -3', 'Buccaneers +3'], 
+                                    "counts": week1data["Eagles vs. Buccaneers (+3)"].value_counts()})
+
+
+# Game 1
+fig1 = px.bar(game1df, x='Game 1', y='counts', text_auto=True)
+fig1 = fig1.update_yaxes(visible=False)
+fig1.update_layout(
+font=dict(
+    size=18,  # Set the font size here
+    # color="RebeccaPurple"
+))
+
+# Game 2
+fig2 = px.bar(game2df, x='Game 2', y='counts', text_auto=True)
+fig2 = fig2.update_yaxes(visible=False)
+fig2.update_layout(
+font=dict(
+    size=18,  # Set the font size here
+    # color="RebeccaPurple"
+))
+
+# Game 3
+fig3 = px.bar(game3df, x='Game 3', y='counts', text_auto=True)
+fig3 = fig3.update_yaxes(visible=False)
+fig3.update_layout(
+font=dict(
+    size=18,  # Set the font size here
+    # color="RebeccaPurple"
+))
+
+# Game 4
+fig4 = px.bar(game4df, x='Game 4', y='counts', text_auto=True)
+fig4 = fig4.update_yaxes(visible=False)
+fig4.update_layout(
+font=dict(
+    size=18,  # Set the font size here
+    # color="RebeccaPurple"
+))
+
+# Game 5
+fig5 = px.bar(game5df, x='Game 5', y='counts', text_auto=True)
+fig5 = fig5.update_yaxes(visible=False)
+fig5.update_layout(
+font=dict(
+    size=18,  # Set the font size here
+    # color="RebeccaPurple"
+))
+
+# Game 6
+fig6 = px.bar(game6df, x='Game 6', y='counts', text_auto=True)
+fig6 = fig6.update_yaxes(visible=False)
+fig6.update_layout(
+font=dict(
+    size=18,  # Set the font size here
+    # color="RebeccaPurple"
+))
 
 def run():
     st.set_page_config(
@@ -44,85 +119,26 @@ def run():
 
     st.markdown("## Week 1 Picks")
 
-    week1data = pd.read_csv("week1picks.csv")
-    week1data = week1data.drop(['Old Record', 'Record', 'Old BB Rec', 'Best Bet Record'], axis=1)
-    week1data
+    game_list
+
 
     st.markdown("## Week 1 \#data")
-
-    game1df = week1data['Browns vs. Texans (+2.5)'].value_counts().astype(int).to_frame()
-    test_data = pd.DataFrame({"Game 1": ['Browns -2.5', 'Texans +2.5'],
-                          "counts": [36, 14]})
+    left_column, middle_column, right_column = st.columns(3)
     
-    left_column, right_column = st.columns(2)
-
-    # game1series = week1data['Browns vs. Texans (+2.5)'].value_counts()
-    construct_df = pd.DataFrame({"Game 1": ['Browns -2.5', 'Texans +2.5'], 
-                                    "counts": week1data['Browns vs. Texans (+2.5)'].value_counts()})
-
-    construct_df2 = pd.DataFrame({"Game 2": ['Chiefs -4.5', 'Dolphins +4.5'], 
-                                    "counts": week1data['Dolphins vs. Chiefs (-4.5)'].value_counts()})
-        #construct_df = construct_df.style.hide_index()
-    
-    # Game 1
-    fig1 = px.bar(construct_df, x='Game 1', y='counts', text_auto=True)
-    fig1 = fig1.update_yaxes(visible=False)
-    fig1.update_layout(
-    font=dict(
-        size=18,  # Set the font size here
-        # color="RebeccaPurple"
-    ))
-
-    # Game 1
-    fig2 = px.bar(construct_df2, x='Game 2', y='counts', text_auto=True)
-    fig2 = fig2.update_yaxes(visible=False)
-    fig2.update_layout(
-    font=dict(
-        size=18,  # Set the font size here
-        # color="RebeccaPurple"
-    ))
 
     with left_column:
-        st.dataframe(construct_df, hide_index=True)
-        st.plotly_chart(fig1)
+        # st.dataframe(game1df, hide_index=True)
+        st.plotly_chart(fig1, use_container_width=True)
+        st.plotly_chart(fig4, use_container_width=True)
+    with middle_column:
+        # st.dataframe(game3df, hide_index=True)
+        st.plotly_chart(fig2, use_container_width=True)
+        st.plotly_chart(fig5, use_container_width=True)
     with right_column:
-        st.dataframe(construct_df2, hide_index=True)
-        st.plotly_chart(fig2)
-
-
-    st.markdown("Plotly chart")
+        # st.dataframe(game5df, hide_index=True)
+        st.plotly_chart(fig3, use_container_width=True)
+        st.plotly_chart(fig6, use_container_width=True)
     
-    
-
-    
-
-    st.write("Printing game1df")
-    # st.write(type(game1df))
-    st.write(game1df)
-
-    st.write("Printing test_data")
-    # st.write(type(test_data))
-    st.write(test_data)
-
-    # game1df = pd.Series(week1data['Browns vs. Texans (+2.5)'].value_counts())
-    # st.write(game1df)
-
-    # chart_data = pd.DataFrame(np.random.randn(20, 3), columns=["a", "b", "c"])
-
-
-    # st.bar_chart(test_data, x='counts', y='pick')
-
-    base = (
-      alt.Chart(test_data)
-      .mark_bar()
-      .encode( # x="counts", y="pick")
-      x=alt.X('counts', axis=alt.Axis(title=None)),
-      y=alt.Y('Game 1', axis=alt.Axis(title=None)),
-    ))
-
-#     c = base.mark_bar() # + base.mark_text(align='left', dx=2)
-    # st.write(type(base.mark_bar()))
-    st.altair_chart(base) #, use_container_width=True)
 
     # left_column, right_column = st.columns(2)
     # You can use a column just like st.sidebar:
