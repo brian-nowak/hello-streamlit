@@ -126,6 +126,8 @@ def run():
     middle_dfs = [game2df, game5df]
     right_dfs = [game3df, game6df]
 
+
+    # added v left col
     # display columns
     very_left_column, left_column, middle_column, right_column = st.columns(4)
     with very_left_column:
