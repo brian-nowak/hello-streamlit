@@ -24,9 +24,6 @@ import re
 
 LOGGER = get_logger(__name__)
 
-# Set page to wide mode
-st.set_page_config(layout="wide")
-
 # pre-formatting data
 week1data = pd.read_csv("week1picks.csv")
 week1picks_table = pd.read_csv("week1_picks_tableformat.csv")
@@ -202,8 +199,9 @@ font=dict(
 
 def run():
     st.set_page_config(
-        page_title="Hello",
+        page_title="2024 NFL Playoff Pick 'em",
         page_icon="👋",
+        layout="wide"
     )
 
     st.write(":balloon: # Welcome to Streamlit! 👋 This is Brian's first streamlit deployment")
