@@ -22,8 +22,10 @@ import plotly.graph_objects as go
 import re
 
 
-
 LOGGER = get_logger(__name__)
+
+# Set page to wide mode
+st.set_page_config(layout="wide")
 
 # pre-formatting data
 week1data = pd.read_csv("week1picks.csv")
