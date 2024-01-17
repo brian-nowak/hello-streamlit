@@ -117,7 +117,7 @@ def run():
     columns_to_keep = ["Name", "Record", "Best Bet Record", "Pts"]
     df_filtered = sheet_df[columns_to_keep]
     # Create a display DataFrame without the 'Score' column
-    df_sorted = df_filtered.sort_values(by='Pts', ascending=False)
+    # df_sorted = df_filtered.sort_values(by='Pts', ascending=False)
     # df_display = df_filtered.drop(columns=['Pts'])
 
     # Initialize a session state variable if it doesn't exist
