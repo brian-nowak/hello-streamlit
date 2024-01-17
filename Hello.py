@@ -106,18 +106,38 @@ def run():
 
     st.write("## Standings")
 
+    #TODO - displaying the df is great, but the re-sort by pts isn't working
+
     # Your Google Sheet's shareable link
     sheet_url = "https://docs.google.com/spreadsheets/d/1NXYlv93aJpPzh4OaWP1pS2Sxm-iQdNVlss83yxbYYAk/gviz/tq?tqx=out:csv&sheet=Week1_Picks"
 
     sheet_df = pd.read_csv(sheet_url, nrows=50)
 
     # Read the online sheet into a DataFrame
-    columns_to_keep = ["Name", "Record", "Best Bet Record"]
+    columns_to_keep = ["Name", "Record", "Best Bet Record", "Pts"]
     df_filtered = sheet_df[columns_to_keep]
+    # Create a display DataFrame without the 'Score' column
+    df_sorted = df_filtered.sort_values(by='Pts', ascending=False)
+    # df_display = df_filtered.drop(columns=['Pts'])
 
+    # Initialize a session state variable if it doesn't exist
+    if 'sorted' not in st.session_state:
+        st.session_state['sorted'] = False
 
-    # Use the data in your Streamlit app
-    
+    # Function to sort the DataFrame
+    def sort_dataframe():
+        st.session_state['sorted'] = not st.session_state['sorted']
+
+    # Button to toggle sorting
+    st.button('Sort/Unsort by Score', on_click=sort_dataframe)
+
+    # Sort the DataFrame based on the session state
+    if st.session_state['sorted']:
+        df_filtered = df_filtered.sort_values(by='Pts', ascending=False)
+
+    # Create a display DataFrame without the 'Score' column
+    df_display = df_filtered.drop(columns=['Pts'])
+
 
     st.markdown("## Week 1 Picks")
 
@@ -131,7 +151,7 @@ def run():
     # display columns
     very_left_column, left_column, middle_column, right_column = st.columns(4)
     with very_left_column:
-        st.dataframe(df_filtered, hide_index=True, height=1000)
+        st.dataframe(df_display, hide_index=True, height=1000)
     with left_column:
         for df in left_dfs:
             fig = create_team_chart(df, color_mapping)
