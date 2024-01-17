@@ -19,6 +19,7 @@ import numpy as np
 import altair as alt
 import plotly.express as px
 import plotly.graph_objects as go
+import re
 
 
 
@@ -26,6 +27,7 @@ LOGGER = get_logger(__name__)
 
 # pre-formatting data
 week1data = pd.read_csv("week1picks.csv")
+week1picks_table = pd.read_csv("week1_picks_tableformat.csv")
 
 # from prompt: turn first row of pandas dataframe into headers
 # also drop a few unnecessary cols
@@ -41,31 +43,118 @@ game_list = week1data.columns.values.tolist()
 game_list = game_list[1:7]
 
 # construct a df of picks for each game
-game1df = pd.DataFrame({"Game 1": ['Browns -2.5', 'Texans +2.5'], 
-                                    "counts": week1data["Browns vs. Texans (+2.5)"].value_counts()})
-game2df = pd.DataFrame({"Game 2": ['Chiefs -4.5', 'Dolphins +4.5'], 
-                                    "counts": week1data["Dolphins vs. Chiefs (-4.5)"].value_counts()})
-game3df = pd.DataFrame({"Game 3": ['Cowboys -7.5', 'Packers +7.5'], 
-                                    "counts": week1data["Packers vs. Cowboys (-7.5)"].value_counts()})
-game4df = pd.DataFrame({"Game 4": ['Lions -3', 'Rams +3'], 
-                                    "counts": week1data["Rams vs. Lions (-3)"].value_counts()})
-game5df = pd.DataFrame({"Game 5": ['Steelers +10', 'Bills -10'], 
-                                    "counts": week1data["Steelers vs. Bills (-10)"].value_counts()})
-game6df = pd.DataFrame({"Game 6": ['Eagles -3', 'Buccaneers +3'], 
-                                    "counts": week1data["Eagles vs. Buccaneers (+3)"].value_counts()})
+game1df = week1picks_table.query("Game_num == 1").drop("Game_num", axis=1)
+game2df = week1picks_table.query("Game_num == 2").drop("Game_num", axis=1)
+game3df = week1picks_table.query("Game_num == 3").drop("Game_num", axis=1)
+game4df = week1picks_table.query("Game_num == 4").drop("Game_num", axis=1)
+game5df = week1picks_table.query("Game_num == 5").drop("Game_num", axis=1)
+game6df = week1picks_table.query("Game_num == 6").drop("Game_num", axis=1)
+
+
+#########################################################################
+def create_team_chart(df, color_mapping):
+    def extract_team_name(team_str):
+        match = re.match(r"^(.*?)\s[\+\-]", team_str)
+        return match.group(1) if match else team_str
+
+    def insert_line_breaks(team_str, max_chars_per_line=10):
+        words = team_str.split()
+        wrapped_str = ""
+        current_line_length = 0
+
+        for word in words:
+            if current_line_length + len(word) > max_chars_per_line:
+                wrapped_str += "<br>"
+                current_line_length = 0
+            wrapped_str += word + " "
+            current_line_length += len(word) + 1
+
+        return wrapped_str.strip()
+
+    df['TeamName'] = df['Team'].apply(extract_team_name)
+    df['WrappedTeamName'] = df['Team'].apply(insert_line_breaks)
+    df['Color'] = df['TeamName'].map(color_mapping)
+
+    # Extract team names for the title
+    team1, team2 = df['TeamName'].iloc[0], df['TeamName'].iloc[1]
+    chart_title = f"{team1} vs. {team2}"
+
+    fig = go.Figure(data=[go.Bar(
+        x=df['WrappedTeamName'],
+        y=df['Picks'],
+        marker_color=df['Color']
+    )])
+
+    fig.update_layout(
+        xaxis=dict(tickangle=0, automargin=True, tickfont=dict(size=10)),
+        title=chart_title,
+        # xaxis_title="Team",
+        # yaxis_title="Count"
+    )
+
+    return fig
+
+
+
+
+##########################################################################
+
+# # Function to extract the team name
+# def extract_team_name(team_str):
+#     match = re.match(r"^(.*?)\s[\+\-]", team_str)
+#     return match.group(1) if match else team_str
+
+# # Function to insert line breaks for wrapping
+# def insert_line_breaks(team_str, max_chars_per_line=10):
+#     words = team_str.split()
+#     wrapped_str = ""
+#     current_line_length = 0
+
+#     for word in words:
+#         if current_line_length + len(word) > max_chars_per_line:
+#             wrapped_str += "<br>"  # Line break
+#             current_line_length = 0
+#         wrapped_str += word + " "
+#         current_line_length += len(word) + 1  # +1 for space
+
+#     return wrapped_str.strip()
+
+# Read team colors
+team_colors = pd.read_csv('team_colors.csv')
+color_mapping = team_colors.set_index('NFL_Team_Name')['c1_new'].to_dict()
+
+# # extract team name for color mapping
+# game1df['TeamName'] = game1df['Team'].apply(extract_team_name)
+# # wrap team name for display purposes
+# game1df['WrappedTeamName'] = game1df['Team'].apply(insert_line_breaks)
+# # Map team names to colors
+# game1df['Color'] = game1df['TeamName'].map(color_mapping)
+
 
 
 # Game 1
-fig1 = px.bar(game1df, x='Game 1', y='counts', text_auto=True)
-fig1 = fig1.update_yaxes(visible=False)
-fig1.update_layout(
-font=dict(
-    size=18,  # Set the font size here
-    # color="RebeccaPurple"
-))
+
+# # Create Plotly bar chart
+# fig = go.Figure(data=[go.Bar(
+#     x=game1df['WrappedTeamName'],
+#     y=game1df['Picks'],
+#     marker_color=game1df['Color']
+# )])
+
+# # Adjust layout for wrapped text
+# fig.update_layout(
+#     xaxis=dict(
+#         tickangle=0,  # Set tick angle to 0 for horizontal text
+#         automargin=True,  # Ensure automatic margin adjustment
+#         tickfont=dict(size=10)  # You can adjust the font size if necessary
+#     ) #,
+#     # title="Team Counts",
+#     # xaxis_title="Team",
+#     # yaxis_title="Count"
+# )
 
 # Game 2
-fig2 = px.bar(game2df, x='Game 2', y='counts', text_auto=True)
+fig2 = px.bar(game2df, x='Team', y='Picks', text_auto=True)
 fig2 = fig2.update_yaxes(visible=False)
 fig2.update_layout(
 font=dict(
@@ -74,7 +163,7 @@ font=dict(
 ))
 
 # Game 3
-fig3 = px.bar(game3df, x='Game 3', y='counts', text_auto=True)
+fig3 = px.bar(game3df, x='Team', y='Picks', text_auto=True)
 fig3 = fig3.update_yaxes(visible=False)
 fig3.update_layout(
 font=dict(
@@ -83,7 +172,7 @@ font=dict(
 ))
 
 # Game 4
-fig4 = px.bar(game4df, x='Game 4', y='counts', text_auto=True)
+fig4 = px.bar(game4df, x='Team', y='Picks', text_auto=True)
 fig4 = fig4.update_yaxes(visible=False)
 fig4.update_layout(
 font=dict(
@@ -92,7 +181,7 @@ font=dict(
 ))
 
 # Game 5
-fig5 = px.bar(game5df, x='Game 5', y='counts', text_auto=True)
+fig5 = px.bar(game5df, x='Team', y='Picks', text_auto=True)
 fig5 = fig5.update_yaxes(visible=False)
 fig5.update_layout(
 font=dict(
@@ -101,7 +190,7 @@ font=dict(
 ))
 
 # Game 6
-fig6 = px.bar(game6df, x='Game 6', y='counts', text_auto=True)
+fig6 = px.bar(game6df, x='Team', y='Picks', text_auto=True)
 fig6 = fig6.update_yaxes(visible=False)
 fig6.update_layout(
 font=dict(
@@ -119,7 +208,18 @@ def run():
 
     st.markdown("## Week 1 Picks")
 
-    game_list
+    # game_list
+    
+    # Assuming game1df, game2df, ..., game6df are your DataFrames
+    left_dfs = [game1df, game4df]
+    middle_dfs = [game2df, game5df]
+    right_dfs = [game3df, game6df]
+
+    # dataframes = [game1df, game2df, game3df, game4df, game5df, game6df]
+
+    # for df in dataframes:
+    #     fig = create_team_chart(df, color_mapping)
+    #     st.plotly_chart(fig)
 
 
     st.markdown("## Week 1 \#data")
@@ -128,16 +228,25 @@ def run():
 
     with left_column:
         # st.dataframe(game1df, hide_index=True)
-        st.plotly_chart(fig1, use_container_width=True)
-        st.plotly_chart(fig4, use_container_width=True)
+        # st.plotly_chart(fig1, use_container_width=True)
+        # st.plotly_chart(fig4, use_container_width=True)
+        for df in left_dfs:
+            fig = create_team_chart(df, color_mapping)
+            st.plotly_chart(fig, use_container_width=True)
     with middle_column:
         # st.dataframe(game3df, hide_index=True)
-        st.plotly_chart(fig2, use_container_width=True)
-        st.plotly_chart(fig5, use_container_width=True)
+        # st.plotly_chart(fig2, use_container_width=True)
+        # st.plotly_chart(fig5, use_container_width=True)
+        for df in middle_dfs:
+            fig = create_team_chart(df, color_mapping)
+            st.plotly_chart(fig, use_container_width=True)
     with right_column:
         # st.dataframe(game5df, hide_index=True)
-        st.plotly_chart(fig3, use_container_width=True)
-        st.plotly_chart(fig6, use_container_width=True)
+        # st.plotly_chart(fig3, use_container_width=True)
+        # st.plotly_chart(fig6, use_container_width=True)
+        for df in right_dfs:
+            fig = create_team_chart(df, color_mapping)
+            st.plotly_chart(fig, use_container_width=True)
     
 
     # left_column, right_column = st.columns(2)
