@@ -93,8 +93,9 @@ color_mapping = team_colors.set_index('NFL_Team_Name')['c1_new'].to_dict()
 def run():
     st.set_page_config(
         page_title="2024 NFL Playoff Pick 'em",
-        page_icon="👋",
-        layout="wide"
+        page_icon=":shark:",
+        layout="wide",
+        initial_sidebar_state="collapsed"
     )
 
     st.write(":balloon: # Welcome to Streamlit! 👋 This is Brian's first streamlit deployment")
