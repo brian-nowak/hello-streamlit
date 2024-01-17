@@ -117,26 +117,8 @@ def run():
     columns_to_keep = ["Name", "Record", "Best Bet Record", "Pts"]
     df_filtered = sheet_df[columns_to_keep]
     # Create a display DataFrame without the 'Score' column
-    # df_sorted = df_filtered.sort_values(by='Pts', ascending=False)
-    # df_display = df_filtered.drop(columns=['Pts'])
-
-    # Initialize a session state variable if it doesn't exist
-    if 'sorted' not in st.session_state:
-        st.session_state['sorted'] = False
-
-    # Function to sort the DataFrame
-    def sort_dataframe():
-        st.session_state['sorted'] = not st.session_state['sorted']
-
-    # Button to toggle sorting
-    st.button('Sort/Unsort by Score', on_click=sort_dataframe)
-
-    # Sort the DataFrame based on the session state
-    if st.session_state['sorted']:
-        df_filtered = df_filtered.sort_values(by='Pts', ascending=False)
-
-    # Create a display DataFrame without the 'Score' column
-    df_display = df_filtered.drop(columns=['Pts'])
+    df_sorted = df_filtered.sort_values(by='Pts', ascending=False)
+    df_display = df_sorted.rename(columns={'Pts': 'Pts (for sorting)'})
 
 
     st.markdown("## Week 1 Picks")
