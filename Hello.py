@@ -104,7 +104,7 @@ def run():
 
     st.markdown("""Thought it would be cool to visualize some of the picks from the crowd. This page will also contain the standings""")
 
-    st.write("## Standings")
+    st.write("## Standings and Latest Picks")
 
     #TODO - displaying the df is great, but the re-sort by pts isn't working
 
@@ -120,18 +120,15 @@ def run():
     df_sorted = df_filtered.sort_values(by='Pts', ascending=False)
     df_display = df_sorted.rename(columns={'Pts': 'Pts (for sorting)'})
 
-
-    st.markdown("## Week 1 Picks")
-
     # sort games into columns
     left_dfs = [game1df, game4df]
     middle_dfs = [game2df, game5df]
     right_dfs = [game3df, game6df]
 
 
-    # added v left col
     # display columns
     very_left_column, left_column, middle_column, right_column = st.columns(4)
+
     with very_left_column:
         st.dataframe(df_display, hide_index=True, height=1000)
     with left_column:
