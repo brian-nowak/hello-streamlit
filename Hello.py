@@ -100,7 +100,24 @@ def run():
         initial_sidebar_state="collapsed"
     )
 
-    st.write(":balloon: # Welcome to Streamlit! 👋 This is Brian's first streamlit deployment")
+    st.write("# 2024 NFL Pick'em Stats")
+
+    st.markdown("""Thought it would be cool to visualize some of the picks from the crowd. This page will also contain the standings""")
+
+    st.write("## Standings")
+
+    # Your Google Sheet's shareable link
+    sheet_url = "https://docs.google.com/spreadsheets/d/1NXYlv93aJpPzh4OaWP1pS2Sxm-iQdNVlss83yxbYYAk/gviz/tq?tqx=out:csv&sheet=Week1_Picks"
+
+    sheet_df = pd.read_csv(sheet_url, nrows=50)
+
+    # Read the online sheet into a DataFrame
+    columns_to_keep = ["Name", "Record", "Best Bet Record"]
+    df_filtered = sheet_df[columns_to_keep]
+
+
+    # Use the data in your Streamlit app
+    
 
     st.markdown("## Week 1 Picks")
 
@@ -110,7 +127,9 @@ def run():
     right_dfs = [game3df, game6df]
 
     # display columns
-    left_column, middle_column, right_column = st.columns(3)
+    very_left_column, left_column, middle_column, right_column = st.columns(4)
+    with very_left_column:
+        st.dataframe(df_filtered, hide_index=True)
     with left_column:
         for df in left_dfs:
             fig = create_team_chart(df, color_mapping)
