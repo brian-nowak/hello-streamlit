@@ -56,7 +56,9 @@ def create_team_chart(df, color_mapping):
     fig = go.Figure(data=[go.Bar(
         x=df['WrappedTeamName'],
         y=df['Picks'],
-        marker_color=df['Color']
+        marker_color=df['Color'],
+        text=df['Picks'],  # Add data labels
+        textposition='inside'  # Position labels outside the bars
     )])
 
     fig.update_layout(
@@ -122,6 +124,7 @@ def run():
             fig = create_team_chart(df, color_mapping)
             st.plotly_chart(fig, use_container_width=True)
     
+
 
     # left_column, right_column = st.columns(2)
     # You can use a column just like st.sidebar:
