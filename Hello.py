@@ -131,7 +131,7 @@ def run():
     # display columns
     very_left_column, left_column, middle_column, right_column = st.columns(4)
     with very_left_column:
-        st.dataframe(df_filtered, hide_index=True)
+        st.dataframe(df_filtered, hide_index=True, height=1000)
     with left_column:
         for df in left_dfs:
             fig = create_team_chart(df, color_mapping)
