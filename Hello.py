@@ -21,12 +21,13 @@ import plotly.express as px
 import plotly.graph_objects as go
 import re
 
+
 LOGGER = get_logger(__name__)
 
 #########################################################################
 # helper functions that create and format the charts given a df with picks
 #########################################################################
-def create_team_chart(df, color_mapping):
+def create_team_chart(df, color_mapping,chart_title=None):
     def extract_team_name(team_str):
         match = re.match(r"^(.*?)\s[\+\-]", team_str)
         return match.group(1) if match else team_str
@@ -51,7 +52,10 @@ def create_team_chart(df, color_mapping):
 
     # Extract team names for the title
     team1, team2 = df['TeamName'].iloc[0], df['TeamName'].iloc[1]
-    chart_title = f"{team1} vs. {team2}"
+    if chart_title:
+        pass
+    else:
+        chart_title = f"{team1} vs. {team2}"
 
     fig = go.Figure(data=[go.Bar(
         x=df['WrappedTeamName'],
@@ -72,8 +76,6 @@ def create_team_chart(df, color_mapping):
 
 
 ##########################################################################
-
-
 # pre-formatting data
 ##########################################################################
 week1picks_table = pd.read_csv("week1_picks_tableformat.csv")
@@ -91,6 +93,34 @@ team_colors = pd.read_csv('team_colors.csv')
 color_mapping = team_colors.set_index('NFL_Team_Name')['c1_new'].to_dict()
 
 
+# Your Google Sheet's shareable link
+sheet_url = "https://docs.google.com/spreadsheets/d/1NXYlv93aJpPzh4OaWP1pS2Sxm-iQdNVlss83yxbYYAk/gviz/tq?tqx=out:csv&sheet=Week1_Picks"
+
+sheet_df = pd.read_csv(sheet_url, nrows=50)
+
+# Read the online sheet into a DataFrame
+columns_to_keep = ["Name", "Record", "Best Bet Record", "Pts"]
+df_filtered = sheet_df[columns_to_keep]
+# Create a display DataFrame without the 'Score' column
+df_sorted = df_filtered.sort_values(by='Pts', ascending=False)
+df_display = df_sorted.rename(columns={'Pts': 'Pts (for sorting)'})
+
+
+# getting week 2 picks
+sheet_url2 = "https://docs.google.com/spreadsheets/d/1NXYlv93aJpPzh4OaWP1pS2Sxm-iQdNVlss83yxbYYAk/gviz/tq?tqx=out:csv&sheet=Week2_Picks"
+week2_sheet_df = pd.read_csv(sheet_url2, nrows=53)
+week2_columns_to_keep = ["Name", "Texans vs. Ravens (-9.5)","Packers vs. 49ers (-9.5)",	"Bucs vs. Lions (-6.5)", "Chiefs vs. Bills (-2.5)", "Best Bet"]
+week2_df_filtered = week2_sheet_df[week2_columns_to_keep]
+
+# Columns of interest
+columns = ["Texans vs. Ravens (-9.5)", "Packers vs. 49ers (-9.5)", "Bucs vs. Lions (-6.5)", "Chiefs vs. Bills (-2.5)", "Best Bet"]
+
+# Summarize each column
+# Generate summaries for each column
+summaries = {col: week2_df_filtered[col].value_counts().rename_axis('Team').reset_index(name='Picks') for col in columns}
+# gm1_smry = summaries['Texans vs. Ravens (-9.5)']
+
+
 ## streamlit page creation and layout
 def run():
     st.set_page_config(
@@ -101,36 +131,48 @@ def run():
     )
 
     st.write("# 2024 NFL Pick'em Stats")
+    st.markdown("""Thought it would be cool to visualize some of the picks from the crowd! 
+    \n This page will contain the standings and should auto-update live from the google sheet. If you have any other ideas on cool things to show on this page, [shoot me an email](mailto:brianfnowak@gmail.com)!""")
 
-    st.markdown("""Thought it would be cool to visualize some of the picks from the crowd. This page will also contain the standings""")
+    # latest picks and standings
+    latest_left, latest_right = st.columns(2)
 
-    st.write("## Standings and Latest Picks")
+    with latest_left:
+        st.write("## Standings")
+        st.dataframe(df_display, hide_index=True, height=400)
+    with latest_right:
+        st.write("## Divisional Round Picks")
+        st.dataframe(week2_df_filtered, hide_index=True,)
 
-    #TODO - displaying the df is great, but the re-sort by pts isn't working
+    st.write("## Divisional Round Pick Charts")
 
-    # Your Google Sheet's shareable link
-    sheet_url = "https://docs.google.com/spreadsheets/d/1NXYlv93aJpPzh4OaWP1pS2Sxm-iQdNVlss83yxbYYAk/gviz/tq?tqx=out:csv&sheet=Week1_Picks"
+    ### latest picks
+    p_left, p_right = st.columns(2)
+    # sort week 1 games into columns
+    left_gm = [summaries['Texans vs. Ravens (-9.5)'], summaries['Bucs vs. Lions (-6.5)']]
+    right_gm = [summaries['Packers vs. 49ers (-9.5)'], summaries['Chiefs vs. Bills (-2.5)'] ] 
+    with p_left:
+        for df in left_gm:
+            fig = create_team_chart(df, color_mapping)
+            st.plotly_chart(fig, use_container_width=True)
+        bb_fig = create_team_chart(summaries['Best Bet'], color_mapping, chart_title='Most Popular Best Bets')
+        st.plotly_chart(bb_fig, use_container_width=True)  
+    with p_right:
+        for df in right_gm:
+            fig = create_team_chart(df, color_mapping)
+            st.plotly_chart(fig, use_container_width=True)      
 
-    sheet_df = pd.read_csv(sheet_url, nrows=50)
+    ### prior week picks
+    st.write("## Wild Card Round Picks")
+    st.write("In hindsight, 'the crowd' in our pool was wrong in 5 out of 6 games (only the Chiefs bet hit, and that split was pretty close). Might be an interesting play to fade the crowd in your bets outside of this pool!")
+    # display columns
+    left_column, middle_column, right_column = st.columns(3)
 
-    # Read the online sheet into a DataFrame
-    columns_to_keep = ["Name", "Record", "Best Bet Record", "Pts"]
-    df_filtered = sheet_df[columns_to_keep]
-    # Create a display DataFrame without the 'Score' column
-    df_sorted = df_filtered.sort_values(by='Pts', ascending=False)
-    df_display = df_sorted.rename(columns={'Pts': 'Pts (for sorting)'})
-
-    # sort games into columns
+    # sort week 1 games into columns
     left_dfs = [game1df, game4df]
     middle_dfs = [game2df, game5df]
     right_dfs = [game3df, game6df]
 
-
-    # display columns
-    very_left_column, left_column, middle_column, right_column = st.columns(4)
-
-    with very_left_column:
-        st.dataframe(df_display, hide_index=True, height=1000)
     with left_column:
         for df in left_dfs:
             fig = create_team_chart(df, color_mapping)
