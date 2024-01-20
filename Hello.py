@@ -155,12 +155,13 @@ def run():
         for df in left_gm:
             fig = create_team_chart(df, color_mapping)
             st.plotly_chart(fig, use_container_width=True)
-        bb_fig = create_team_chart(summaries['Best Bet'], color_mapping, chart_title='Most Popular Best Bets')
-        st.plotly_chart(bb_fig, use_container_width=True)  
     with p_right:
         for df in right_gm:
             fig = create_team_chart(df, color_mapping)
             st.plotly_chart(fig, use_container_width=True)      
+
+    bb_fig = create_team_chart(summaries['Best Bet'], color_mapping, chart_title='Most Popular Best Bets')
+    st.plotly_chart(bb_fig, use_container_width=True)  
 
     ### prior week picks
     st.write("## Wild Card Round Picks")
