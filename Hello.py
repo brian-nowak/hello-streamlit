@@ -96,7 +96,7 @@ color_mapping = team_colors.set_index('NFL_Team_Name')['c1_new'].to_dict()
 # Your Google Sheet's shareable link
 sheet_url = "https://docs.google.com/spreadsheets/d/1NXYlv93aJpPzh4OaWP1pS2Sxm-iQdNVlss83yxbYYAk/gviz/tq?tqx=out:csv&sheet=Week1_Picks"
 
-sheet_df = pd.read_csv(sheet_url, nrows=50)
+sheet_df = pd.read_csv(sheet_url, nrows=51)
 
 # Read the online sheet into a DataFrame
 columns_to_keep = ["Name", "Record", "Best Bet Record", "Pts"]
@@ -108,7 +108,7 @@ df_display = df_sorted.rename(columns={'Pts': 'Pts (for sorting)'})
 
 # getting week 2 picks
 sheet_url2 = "https://docs.google.com/spreadsheets/d/1NXYlv93aJpPzh4OaWP1pS2Sxm-iQdNVlss83yxbYYAk/gviz/tq?tqx=out:csv&sheet=Week2_Picks"
-week2_sheet_df = pd.read_csv(sheet_url2, nrows=53)
+week2_sheet_df = pd.read_csv(sheet_url2, nrows=49)
 week2_columns_to_keep = ["Name", "Texans vs. Ravens (-9.5)","Packers vs. 49ers (-9.5)",	"Bucs vs. Lions (-6.5)", "Chiefs vs. Bills (-2.5)", "Best Bet"]
 week2_df_filtered = week2_sheet_df[week2_columns_to_keep]
 
