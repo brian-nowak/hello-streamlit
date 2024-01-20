@@ -132,7 +132,7 @@ def run():
 
     st.write("# 2024 NFL Pick'em Stats")
     st.markdown("""Thought it would be cool to visualize some of the picks from the crowd! 
-    \n This page will contain the standings and should auto-update live from the google sheet. If you have any other ideas on cool things to show on this page, [shoot me an email](mailto:brianfnowak@gmail.com)!""")
+    \n This page will contain the standings and should will update live from the google sheet (assuming I go into the google sheet and update game winners in a timely manner). If you have any other ideas on cool things to show on this page, [shoot me an email](mailto:brianfnowak@gmail.com)!""")
 
     # latest picks and standings
     latest_left, latest_right = st.columns(2)
