@@ -98,19 +98,18 @@ sheet_url = "https://docs.google.com/spreadsheets/d/1NXYlv93aJpPzh4OaWP1pS2Sxm-i
 
 sheet_df = pd.read_csv(sheet_url, nrows=51)
 
-# Read the online sheet into a DataFrame
-columns_to_keep = ["Name", "Record", "Best Bet Record", "Pts"]
-df_filtered = sheet_df[columns_to_keep]
-# Create a display DataFrame without the 'Score' column
-df_sorted = df_filtered.sort_values(by='Pts', ascending=False)
-df_display = df_sorted.rename(columns={'Pts': 'Pts (for sorting)'})
-
-
 # getting week 2 picks
 sheet_url2 = "https://docs.google.com/spreadsheets/d/1NXYlv93aJpPzh4OaWP1pS2Sxm-iQdNVlss83yxbYYAk/gviz/tq?tqx=out:csv&sheet=Week2_Picks"
 week2_sheet_df = pd.read_csv(sheet_url2, nrows=49)
 week2_columns_to_keep = ["Name", "Texans vs. Ravens (-9.5)","Packers vs. 49ers (-9.5)",	"Bucs vs. Lions (-6.5)", "Chiefs vs. Bills (-2.5)", "Best Bet"]
 week2_df_filtered = week2_sheet_df[week2_columns_to_keep]
+
+# week 2 standings
+columns_to_keep = ["Name", "Record", "Best Bet Record", "Pts"]
+df_filtered = week2_sheet_df[columns_to_keep]
+# Create a display DataFrame without the 'Score' column
+df_sorted = df_filtered.sort_values(by='Pts', ascending=False)
+df_display = df_sorted.rename(columns={'Pts': 'Pts (for sorting)'})
 
 # Columns of interest
 columns = ["Texans vs. Ravens (-9.5)", "Packers vs. 49ers (-9.5)", "Bucs vs. Lions (-6.5)", "Chiefs vs. Bills (-2.5)", "Best Bet"]
