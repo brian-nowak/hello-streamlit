@@ -20,6 +20,7 @@ import altair as alt
 import plotly.express as px
 import plotly.graph_objects as go
 import re
+from vega_datasets import data
 
 
 LOGGER = get_logger(__name__)
@@ -94,9 +95,15 @@ color_mapping = team_colors.set_index('NFL_Team_Name')['c1_new'].to_dict()
 
 
 # Your Google Sheet's shareable link
-sheet_url = "https://docs.google.com/spreadsheets/d/1NXYlv93aJpPzh4OaWP1pS2Sxm-iQdNVlss83yxbYYAk/gviz/tq?tqx=out:csv&sheet=Week1_Picks"
+# sheet_url = "https://docs.google.com/spreadsheets/d/1NXYlv93aJpPzh4OaWP1pS2Sxm-iQdNVlss83yxbYYAk/gviz/tq?tqx=out:csv&sheet=Week1_Picks"
+golf_sheet_url = "https://docs.google.com/spreadsheets/d/1dyLJ7Z_o_vAT9ZlZqDRw-MLlxDTU6nps7EnF560Xoc4/gviz/tq?tqx=out:csv&sheet=Scoring"
 
-sheet_df = pd.read_csv(sheet_url, nrows=51)
+golf_sheet_df = pd.read_csv(golf_sheet_url, nrows=8)
+
+# summarize current total team points
+pts_summary = golf_sheet_df.groupby('team')['total_pts'].agg('sum').reset_index()
+pts_summary.insert(loc=2, column='pts_available', value=15)
+
 
 # getting week 2 picks
 sheet_url2 = "https://docs.google.com/spreadsheets/d/1NXYlv93aJpPzh4OaWP1pS2Sxm-iQdNVlss83yxbYYAk/gviz/tq?tqx=out:csv&sheet=Week2_Picks"
@@ -119,22 +126,289 @@ columns = ["Texans vs. Ravens (-9.5)", "Packers vs. 49ers (-9.5)", "Bucs vs. Lio
 summaries = {col: week2_df_filtered[col].value_counts().rename_axis('Team').reset_index(name='Picks') for col in columns}
 # gm1_smry = summaries['Texans vs. Ravens (-9.5)']
 
+##########################################################################
+# streamlit page creation and layout
+##########################################################################
 
-## streamlit page creation and layout
 def run():
     st.set_page_config(
-        page_title="2024 NFL Playoff Pick 'em",
-        page_icon=":shark:",
+        page_title="2024 Dudes Golf Trip",
+        page_icon=":golf:",
         layout="wide",
         initial_sidebar_state="collapsed"
     )
 
-    st.write("# 2024 NFL Pick'em Stats")
-    st.markdown("""Thought it would be cool to visualize some of the picks from the crowd! 
-    \n This page will contain the standings and should will update live from the google sheet (assuming I go into the google sheet and update game winners in a timely manner). If you have any other ideas on cool things to show on this page, [shoot me an email](mailto:brianfnowak@gmail.com)!""")
+    ##########################################################################
+    # Golf data
+    ##########################################################################
+
+    st.write("# Golf data")
+    st.dataframe(golf_sheet_df)
+
+
+    st.dataframe(pts_summary)
+
+    st.write("### Plotly")
+    # Create two columns for the charts
+    col1, col2 = st.columns(2)
+
+    # Function to create a chart for a team
+    def create_team_chart(team_data, right_aligned=False):
+        fig = go.Figure()
+        
+        total_width = team_data['total_pts'] + team_data['pts_available']
+
+        # Set colors based on team
+        if team_data['team'] == 'Guys':
+            total_pts_color = 'dodgerblue'
+        elif team_data['team'] == 'Dudes':
+            total_pts_color = 'forestgreen'
+        else:
+            total_pts_color = 'purple'  # Default color if neither Guys nor Dudes
+        
+        available_pts_color = 'lightgray'
+        
+        if right_aligned:
+            # For right-aligned chart
+            fig.add_trace(go.Bar(
+                y=[''],
+                x=[team_data['pts_available']],
+                width=0.1,
+                name='Available Points',
+                orientation='h',
+                marker=dict(color=available_pts_color)
+            ))
+            fig.add_trace(go.Bar(
+                y=[''],
+                x=[team_data['total_pts']],
+                width=0.1,
+                name='Total Points',
+                orientation='h',
+                marker=dict(color=total_pts_color)
+            ))
+            x_range = [0, total_width]
+        else:
+            # For left-aligned chart
+            fig.add_trace(go.Bar(
+                y=[''],
+                x=[team_data['total_pts']],
+                width=0.1,
+                name='Total Points',
+                orientation='h',
+                marker=dict(color=total_pts_color)
+            ))
+            fig.add_trace(go.Bar(
+                y=[''],
+                x=[team_data['pts_available']],
+                width=0.1,
+                name='Available Points',
+                orientation='h',
+                marker=dict(color=available_pts_color)
+            ))
+            x_range = [total_width, 0]  # Reverse the x-axis
+
+        fig.update_layout(
+            # title=f"Points for {team_data['team']}",
+            barmode='stack',
+            height=120,  # You can adjust this value
+            showlegend=False,
+            # xaxis=dict(range=x_range, autorange=False),
+            margin=dict(l=1, r=1, t=1, b=1)  # Reduce margins
+    )
+        
+        return fig
+
+    # Inject custom CSS to reduce gap between columns
+    st.markdown("""
+    <style>
+        .stColumn {
+            padding: 0px 0px 0px 0px;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+
+    # Create and display left-aligned chart for Dudes
+    with col1:
+        st.write("## Guys")
+        guys_data = pts_summary[pts_summary['team'] == 'Guys'].iloc[0]
+        st.plotly_chart(create_team_chart(guys_data, right_aligned=False), use_container_width=True)
+
+    # Create and display right-aligned chart for Guys
+    with col2:
+        st.write("## Dudes")
+        dudes_data = pts_summary[pts_summary['team'] == 'Dudes'].iloc[0]
+        st.plotly_chart(create_team_chart(dudes_data, right_aligned=True), use_container_width=True)
+
+    st.write("## Latest version here - using st.plotly_chart()")
+
+    # Create two columns for the charts
+    col1, col2 = st.columns(2)
+
+    def create_percentage_chart(team_data, reverse=False, bg_color='#F0F0F0'):
+        # Calculate percentage
+        percentage = (team_data['total_pts'] / 15) * 100
+        
+        # Create the chart
+        fig = go.Figure()
+        fig.add_trace(go.Bar(
+            x=[percentage],
+            y=[team_data['team']],
+            orientation='h',
+            marker_color='dodgerblue' if team_data['team'] == 'Guys' else 'forestgreen',
+            text=[f"{team_data['total_pts']:.1f}"],#[f"{percentage:.1f}%"],
+            textposition='outside'
+        ))
+        
+        if reverse == True:
+            fig.update_layout(
+                height=100,
+                margin=dict(l=0, r=0, t=0, b=0),
+                xaxis=dict(range=[100, 0], title="", showticklabels=False,),
+                yaxis=dict(title="", showticklabels=False, showline=False),
+                showlegend=False,
+                plot_bgcolor=bg_color,  # Set plot background color
+                # paper_bgcolor=bg_color  # Set paper background color
+            )
+        else:
+            # Customize the chart
+            fig.update_layout(
+                height=100,
+                margin=dict(l=0, r=0, t=0, b=0),
+                xaxis=dict(range=[0, 100], title="", showticklabels=False,),
+                yaxis=dict(title="", showticklabels=False, showline=False),
+                showlegend=False,
+                plot_bgcolor=bg_color,  # Set plot background color
+            )
+        
+        return fig
+
+    # Create and display chart for Guys
+    with col1:
+        st.write("## Guys")
+        guys_data = pts_summary[pts_summary['team'] == 'Guys'].iloc[0]
+        st.plotly_chart(create_percentage_chart(guys_data), use_container_width=True)
+
+    # Create and display chart for Dudes
+    with col2:
+        st.write("## Dudes")
+        dudes_data = pts_summary[pts_summary['team'] == 'Dudes'].iloc[0]
+        st.plotly_chart(create_percentage_chart(dudes_data, reverse=True), use_container_width=True)
+
+
+
+    st.write("## Built in st charts/ Vega?")
+
+    source = data.barley()
+
+    filtered_df = golf_sheet_df[golf_sheet_df['team'] == 'Guys']
+    st.dataframe(filtered_df)
+
+    # # Sort the dataframe by 'site' in descending order (Z-A)
+    # source_sorted = source.sort_values('site', ascending=False)
+
+    # # Reset the index to ensure proper ordering in the chart
+    # source_sorted = source_sorted.reset_index(drop=True)
+
+    # Convert the DataFrame to a list of dictionaries for Vega-Lite
+    barley_dict = source.to_dict(orient='records')
+
+    guys_dict = filtered_df.to_dict(orient='records')
+
+    # Calculate the sum of total_pts
+    total_pts_sum = filtered_df['total_pts'].sum()
+
+    # Calculate the percentage (out of 15)
+    percentage = (total_pts_sum / 15) * 100
+
+    # Create a new dictionary with the percentage
+    percentage_dict = [
+        {"team": "Guys", "percentage": percentage}
+    ]
+
+    # Create the Vega-Lite chart specification
+    vega_spec = {
+        "data": {"values": percentage_dict},
+        "mark": {"type": "bar", "color": "blue"},
+        "encoding": {
+            "x": {
+                "field": "percentage",
+                "type": "quantitative",
+                "axis": {"format": ".0f", "title": "Percentage"},
+                "scale": {"domain": [0, 100]}  # This ensures the axis always goes from 0 to 100
+            },
+            "y": {"field": "team", "type": "nominal", "axis": {"title": ""}},
+            "tooltip": [
+                {"field": "team", "type": "nominal"},
+                {"field": "percentage", "type": "quantitative", "format": ".1f", "title": "Percentage"}
+            ]
+        },
+        "config": {
+            "view": {"strokeWidth": 0},
+            "axis": {"grid": False}
+        },
+        "width": "container",
+        "height": 100
+    }
+
+    # Display the chart
+    st.vega_lite_chart(vega_spec, use_container_width=True)
+
+    # Create the bar chart with the sorted data
+    st.vega_lite_chart({
+        "data": {"values": barley_dict},
+        "mark": "bar",
+        # "encoding": {
+        #     "x": {"aggregate": "sum", "field": "yield"},
+        #     "y": {"field": "variety"},
+        #     "color": {"field": "site"}
+        # }
+        "encoding": {
+            "x": {"aggregate": "sum", "field": "yield"},
+            "y": {"field": "variety"},
+            "color": {"field": "site"},
+            "order": {"aggregate": "sum", "field": "yield"}
+        }
+        })
+
+    # Create two columns for the charts
+    col1, col2 = st.columns(2)
+
+    # Function to create a DataFrame for the bar chart
+    def create_chart_data(team_data, reverse=False):
+        data = pd.DataFrame({
+            'Total Points': [team_data['total_pts']],
+            'Available Points': [team_data['pts_available']]
+        })
+        if reverse:
+            data = data.sort_index(axis=1, ascending=True)
+        else:
+            data = data.sort_index(axis=1, ascending=False)
+        return data
+
+
+    # Create and display chart for Dudes
+    with col1:
+        st.subheader("Dudes")
+        dudes_data = pts_summary[pts_summary['team'] == 'Dudes'].iloc[0]
+        dudes_chart_data = create_chart_data(dudes_data)
+        st.dataframe(dudes_chart_data)
+        st.bar_chart(data=dudes_chart_data, horizontal=True)
+
+    # Create and display chart for Guys
+    with col2:
+        st.subheader("Guys")
+        guys_data = pts_summary[pts_summary['team'] == 'Guys'].iloc[0]
+        guys_chart_data = create_chart_data(guys_data, reverse=True)
+        st.dataframe(guys_data)
+        st.dataframe(guys_chart_data)
+        st.bar_chart(data=guys_chart_data,horizontal=True)
+
+
+
 
     # latest picks and standings
-    latest_left, latest_right = st.columns(2)
+    latest_left, latest_right = st.columns(2, vertical_alignment="bottom")
 
     with latest_left:
         st.write("## Standings")
